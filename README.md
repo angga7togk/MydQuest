@@ -63,12 +63,13 @@ With these detailed actions and conditions, you have full control over creating 
 
 Create diverse and exciting rewards for your quests using these fully customizable reward types. Mix and match to enhance player satisfaction and engagement.
 
-| **Type**       | **Description**                                          |
-| -------------- | -------------------------------------------------------- |
-| 🖥️ **COMMAND** | Execute server commands upon quest completion.           |
-| 🎒 **ITEM**    | Reward players with specific in-game items.              |
-| 💰 **MONEY**   | Grant virtual currency for use in your server's economy. |
-| ⭐ **XP**      | Reward experience points for character progression.      |
+| **Type**        | **Description**                                          |
+| --------------- | -------------------------------------------------------- |
+| 🖥️ **COMMAND**  | Execute server commands upon quest completion.           |
+| 🎒 **ITEM**     | Reward players with specific in-game items.              |
+| 💰 **MONEY**    | Grant virtual currency for use in your server's economy. |
+| ⭐ **XP**       | Reward experience points for character progression.      |
+| ⭐ **XP_LEVEL** | Reward level points for character progression.           |
 
 ## 🚀 **Plugin Supports**
 
@@ -79,6 +80,7 @@ Enhance compatibility and functionality by integrating with these supported plug
 - 🏦 **BedrockEconomy**: Support for offering money rewards.
 - 🏘️ **EconomyLand**: Prevent exploitation and validate land ownership.
 - 🛡️ **WorldGuard**: Ensure quests respect world protection rules.
+- 💠 **ScoreHud**: ScoreHud support.
 
 ## 📂 **Installation**
 

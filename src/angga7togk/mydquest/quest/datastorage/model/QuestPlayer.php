@@ -2,7 +2,6 @@
 
 namespace angga7togk\mydquest\quest\datastorage\model;
 
-use angga7togk\mydquest\quest\TypeQuest;
 use DateTime;
 
 final class QuestPlayer

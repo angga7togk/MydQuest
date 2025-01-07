@@ -3,11 +3,17 @@
 namespace angga7togk\mydquest;
 
 use angga7togk\mydquest\i18n\MydLang;
+use angga7togk\mydquest\listener\EventListener;
+use angga7togk\mydquest\quest\Quest;
 use angga7togk\mydquest\quest\datastorage\MySQLDataStorer;
 use angga7togk\mydquest\quest\datastorage\SQLDataStorer;
 use angga7togk\mydquest\quest\datastorage\SQLiteDataStorer;
-use angga7togk\mydquest\utils\JsonLogic;
-use angga7togk\mydquestl\utils\Utils;
+use angga7togk\mydquest\quest\Difficulty;
+use angga7togk\mydquest\quest\JsonQuest;
+use angga7togk\mydquest\utils\Utils;
+use DaPigGuy\libPiggyEconomy\libPiggyEconomy;
+use DaPigGuy\libPiggyEconomy\providers\EconomyProvider;
+use DaPigGuy\libPiggyUpdateChecker\libPiggyUpdateChecker;
 use pocketmine\item\StringToItemParser;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
@@ -19,6 +25,13 @@ class MydQuest extends PluginBase
   use SingletonTrait;
 
   private SQLDataStorer $database;
+  private ?EconomyProvider $economyProvider = null;
+
+
+  public static bool $piggyCustomEnchantmentsSupported = false;
+
+  /** @var array<string, Quest> $quests*/
+  private array $quests = [];
 
   public function onLoad(): void
   {
@@ -27,26 +40,44 @@ class MydQuest extends PluginBase
 
   public function onEnable(): void
   {
+    libPiggyUpdateChecker::init($this);
     $this->saveDefaultConfig();
     $this->selectDatabase();
+    $this->selectLanguage();
 
-    // Memanggil fungsi tes() dengan parameter yang sesuai
-    tes($this->getServer());
+    /** Register Default Quests */
+    $this->registerJsonQuests();
 
-    $questFolder = $this->getDataFolder() . "quest/";
-    if (!is_dir($questFolder)) {
-      mkdir($questFolder);
-    }
-    $this->registerJsonQuests($questFolder);
+
+    $this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
+
+
+    $this->checkSoftDependencies();
   }
 
   public function onDisable(): void
   {
     if (isset($this->database)) $this->database->close();
   }
+
+  private function checkSoftDependencies(): void
+  {
+    $plMgr = $this->getServer()->getPluginManager();
+    
+    self::$piggyCustomEnchantmentsSupported = $plMgr->getPlugin("PiggyCustomEnchants") !== null;
+
+    if (
+      $plMgr->getPlugin("EconomyAPI") !== null ||
+      $plMgr->getPlugin("BedrockEconomy") !== null
+    ) {
+      /** Init Economy Provider */
+      libPiggyEconomy::init();
+      $this->economyProvider = libPiggyEconomy::getProvider($this->getConfig()->get("economy"));
+    }
+  }
+
   private function selectLanguage(): void
   {
-    $this->saveDefaultConfig();
 
     $oldLanguageDir = $this->getDataFolder() . "language";
     if (file_exists($oldLanguageDir)) {
@@ -81,29 +112,49 @@ class MydQuest extends PluginBase
     return true;
   }
 
-  protected function getDatabase(): SQLDataStorer
+  public function getDatabase(): SQLDataStorer
   {
     return $this->database;
+  }
+
+  public function getEconomyProvider(): EconomyProvider
+  {
+    return $this->economyProvider;
+  }
+
+  public function getQuest(string $id): ?Quest
+  {
+    return $this->quests[$id] ?? null;
+  }
+
+  /**
+   * @return array<string, Quest>
+   */
+  public function getQuests(): array
+  {
+    return $this->quests;
   }
 
   /**
    * Mendaftarkan semua Quest berbasis JSON yang di dalam folder resources/quests.
    * English: Register all quests based on JSON in the resources/quests folder.
    */
-  private function registerJsonQuests(string $folder): void
+  private function registerJsonQuests(): void
   {
-    $resourcePath = $this->getFile() . "resources/quest";
+    $questFolder = $this->getDataFolder() . "quests/";
+    if (!is_dir($questFolder)) {
+      mkdir($questFolder);
+    }
+
+    $resourcePath = $this->getFile() . "resources/quests";
     $dirIterator = new \RecursiveDirectoryIterator($resourcePath, \FilesystemIterator::SKIP_DOTS);
     $iterator = new \RecursiveIteratorIterator($dirIterator);
 
     foreach ($iterator as $file) {
       if ($file->getExtension() === "json" && !str_starts_with($file->getFilename(), "__")) {
-        $destination = $folder . $file->getFilename();
-        if (!file_exists($destination)) {
-          $this->saveResource("quests/" . $file->getFilename());
-          $questJsonToArray = (new  Config($this->getDataFolder() . "quests/" . $file->getFileName(), Config::JSON, []))->getAll();
-          $this->registerQuestArray($questJsonToArray);
-        }
+        $this->saveResource("quests/" . $file->getFilename());
+        $questJsonToArray = (new  Config($questFolder . $file->getFileName(), Config::JSON, []))->getAll();
+        $this->registerQuestArray($questJsonToArray);
       }
     }
   }
@@ -115,6 +166,21 @@ class MydQuest extends PluginBase
   public function registerQuestArray(array $q): void
   {
     $this->validationQuestArray($q);
+
+
+    $quest = new JsonQuest(
+      $q['id'],
+      $q['name'],
+      $q['description'],
+      Difficulty::tryFrom($q['difficulty']),
+      StringToItemParser::getInstance()->parse($q['button']),
+      (int)$q['goal_progress'],
+      [],
+      $q['actions']
+    );
+    $this->getServer()->getLogger()->debug("Registered quest: {$quest->getId()}");
+    $this->quests[$q['id']] = $quest;
+    $this->getServer()->getPluginManager()->registerEvents($quest, $this);
   }
 
   /**
@@ -130,8 +196,8 @@ class MydQuest extends PluginBase
     if (!isset($q['goal_progress'])) throw new \Exception("Key 'goal_progress' is missing in the json quest array.");
     if (!isset($q['rewards'])) throw new \Exception("Key 'rewards' is missing in the json quest array.");
 
-    if (strlen($q['id'] > 6)) throw new \Exception("Key 'id' must be less than 6 characters.");
-    if (strlen($q['name'] > 32)) throw new \Exception("Key 'name' must be less than 32 characters.");
+    if (strlen($q['id'])  > 6) throw new \Exception("Key 'id' must be less than 6 characters.");
+    if (strlen($q['name']) > 32) throw new \Exception("Key 'name' must be less than 32 characters.");
 
     if (StringToItemParser::getInstance()->parse($q['button']) === null) throw new \Exception("Key 'button' must be a valid item.");
 
@@ -148,7 +214,9 @@ class MydQuest extends PluginBase
       if (!isset($reward['type'])) throw new \Exception("Key 'type' is missing in the 'rewards' json quest array.");
       if (
         $reward['type'] !== 'COMMAND' &&
-        $reward['type'] !== 'ITEM'
+        $reward['type'] !== 'ITEM' &&
+        $reward['type'] !== 'MONEY' &&
+        $reward['type'] !== 'XP'
       ) {
       }
       if (!isset($reward['value'])) throw new \Exception("Key 'value' is missing in the 'rewards' json quest array.");

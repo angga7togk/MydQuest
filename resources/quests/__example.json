@@ -33,51 +33,43 @@
         "lore": ["&7Sword Legendary"], // opsional
         "enchantments": ["sharpness:5", "fire_aspect:2", "vampire:1"]
       }
+    },
+    {
+      "type": "MONEY",
+      "value": 1000,
+      "chance": 50
+    },
+    {
+      "type": "XP",
+      "value": 500,
+      "chance": 71
+    },
+    {
+      "type": "XP_LEVEL",
+      "value": 1,
+      "chance": 30
     }
   ],
 
   /**
    * All conditions are optional, can be filled in or not
    */
-  "actions": [
-    {
-      "type": "BREAK",
+  "actions": {
+    "break": {
+      "add_progress": 1,
       "condition": {
-        "target_block": "minecraft:stone",
-        "item_in_hand": "minecraft:stone_pickaxe"
-      },
-      "add_progress": 1 // add progress if break block
-    },
-    {
-      "type": "PLACE",
-      "condition": {
-        "item_in_hand": "minecraft:stone_pickaxe"
-      },
-      "add_progress": 1 // add progress if break block
-    },
-    {
-      "type": "CONSUME",
-      "condition": {
-        "consume_item": "minecraft:stone_pickaxe"
-      },
-      "add_progress": 1 // add progress if break block
-    },
-    {
-      "type": "KILL",
-      "condition": {
-        "target_entity": "PLAYER", // PLAYER, ENTITY
-        "item_in_hand": "minecraft:stone_sword"
-      },
-      "add_progress": 5
-    },
-    {
-      "type": "ENCHANT",
-      "condition": {
-        "enchantment": "sharpness",
-        "enchant_level": ">10", // >, <, >=, <=, ==, !=, or remove "enchant_level"
-        "item_in_hand": "minecraft:stone_sword"
-      },
-      "add_progress": 2
+        "and": {
+          "target_block": ["minecraft:oak_log"],
+          "item_in_hand": [
+            "minecraft:stone_axe",
+            "minecraft:diamond_axe",
+            "minecraft:golden_axe",
+            "minecraft:iron_axe",
+            "minecraft:wooden_axe",
+            "minecraft:netherite_axe"
+          ]
+        }
+      }
     }
-  ]
+  }
 }

@@ -26,7 +26,7 @@ class ItemReward extends Reward
     $item = StringToItemParser::getInstance()->parse($d['item']);
     $item->setCount(isset($d['count']) ? $d['count'] : 1);
     if(isset($d['custom_name'])) $item->setCustomName($d['custom_name']);
-    if(isset($d['lore'])) $item->setLore($d['lore']);
+    if(isset($d['lore']) && is_array($d['lore'])) $item->setLore($d['lore']);
     if(isset($d['enchantments'])) {
       foreach ($d['enchantments'] as $enchantment) {
         $ee = explode(':', $enchantment);
@@ -43,7 +43,7 @@ class ItemReward extends Reward
   private function getEnchantmentByName(string $enchantName): ?Enchantment
   {
     $enchant = null;
-    if (MydQuest::$piggyCustomEnchantmentsSupport) {
+    if (MydQuest::$piggyCustomEnchantmentsSupported) {
       if (CustomEnchantManager::getEnchantmentByName($enchantName) !== null) {
         $enchant = CustomEnchantManager::getEnchantmentByName($enchantName);
       }

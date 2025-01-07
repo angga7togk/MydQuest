@@ -3,7 +3,6 @@
 namespace angga7togk\mydquest\quest\datastorage;
 
 use angga7togk\mydquest\MydQuest;
-use angga7togk\mydquest\quest\TypeQuest;
 use DateTime;
 use pocketmine\player\Player;
 
@@ -35,19 +34,14 @@ abstract class BaseDataStorer
 
   protected abstract function insertPlayer(Player $player, string $questId, DateTime $lastTime): void;
 
-  protected abstract function setLastTime(Player $player, string $questId, DateTime $lastTime): void;
-
   protected abstract function setIsComplete(Player $player, string $questId, bool $isComplete): void;
 
   protected abstract function setIsActive(Player $player, string $questId, bool $isActive): void;
 
-  protected abstract function setCompletedCount(Player $player, string $questId, int $count): void;
   protected abstract function addCompletedCount(Player $player, string $questId, int $count): void;
 
-  protected abstract function setFailedCount(Player $player, string $questId, int $count): void;
   protected abstract function addFailedCount(Player $player, string $questId, int $count): void;
-
-  protected abstract function setProgress(Player $player, string $questId, int $progress): void;
+  
   protected abstract function addProgress(Player $player, string $questId, int $progress): void;
 
 

@@ -4,7 +4,7 @@ namespace angga7togk\mydquest\quest\datastorage;
 
 
 use angga7togk\mydquest\quest\datastorage\model\QuestPlayer;
-use angga7togk\mydquest\quest\TypeQuest;
+use angga7togk\mydquest\utils\Utils;
 use DateTime;
 use pocketmine\player\Player;
 use poggit\libasynql\DataConnector;
@@ -21,16 +21,12 @@ class SQLDataStorer extends BaseDataStorer
 
   const SET_IS_COMPLETE = "mydquest.set_is_complete";
   const SET_IS_ACTIVE = "mydquest.set_is_active";
-  const SET_COMPLETED_COUNT = "mydquest.set_completed_count";
-  const SET_FAILED_COUNT = "mydquest.set_failed_count";
-  const SET_PROGRESS = "mydquest.set_progress";
-  const SET_LAST_TIME = "mydquest.set_last_time";
 
   const ADD_COMPLETED_COUNT = "mydquest.add_completed_count";
   const ADD_FAILED_COUNT = "mydquest.add_failed_count";
   const ADD_PROGRESS = "mydquest.add_progress";
 
-  const RESET_PLAYER_PROGRESS = "mydquest.reset_player_progess";
+  const RESET_PLAYER_PROGRESS = "mydquest.reset_player_progress";
 
   protected DataConnector $database;
   protected string $type;
@@ -65,6 +61,9 @@ class SQLDataStorer extends BaseDataStorer
     $callable($questPlayers, []);
   }
 
+  /**
+   * @param callable(PlayerQuest $quest, array $rows): void $callable
+   */
   public function getPlayerOne(Player $player, string $questId, callable $callable): void
   {
     $playerName = strtolower($player->getName());
@@ -101,15 +100,6 @@ class SQLDataStorer extends BaseDataStorer
     ]);
   }
 
-  public function setLastTime(Player $player, string $questId, DateTime $lastTime): void
-  {
-    $this->database->executeChange(self::SET_LAST_TIME, [
-      'player' => strtolower($player->getName()),
-      'questid' => $questId,
-      'lasttime' => $lastTime->getTimestamp(),
-    ]);
-  }
-
 
   public function setIsComplete(Player $player, string $questId, bool $isComplete): void
   {
@@ -129,27 +119,9 @@ class SQLDataStorer extends BaseDataStorer
     ]);
   }
 
-  public function setCompletedCount(Player $player, string $questId, int $count): void
-  {
-    $this->database->executeChange(self::SET_COMPLETED_COUNT, [
-      'player' => strtolower($player->getName()),
-      'questid' => $questId,
-      'value' => $count,
-    ]);
-  }
-
   public function addCompletedCount(Player $player, string $questId, int $count): void
   {
     $this->database->executeChange(self::ADD_COMPLETED_COUNT, [
-      'player' => strtolower($player->getName()),
-      'questid' => $questId,
-      'value' => $count,
-    ]);
-  }
-
-  public function setFailedCount(Player $player, string $questId, int $count): void
-  {
-    $this->database->executeChange(self::SET_FAILED_COUNT, [
       'player' => strtolower($player->getName()),
       'questid' => $questId,
       'value' => $count,
@@ -162,15 +134,6 @@ class SQLDataStorer extends BaseDataStorer
       'player' => strtolower($player->getName()),
       'questid' => $questId,
       'value' => $count,
-    ]);
-  }
-
-  public function setProgress(Player $player, string $questId, int $progress): void
-  {
-    $this->database->executeChange(self::SET_PROGRESS, [
-      'player' => strtolower($player->getName()),
-      'questid' => $questId,
-      'value' => $progress,
     ]);
   }
 
@@ -187,6 +150,7 @@ class SQLDataStorer extends BaseDataStorer
   {
     $this->database->executeChange(self::RESET_PLAYER_PROGRESS, [
       'player' => strtolower($player->getName()),
+      'lasttime' => Utils::getDate()->getTimestamp()
     ]);
   }
 

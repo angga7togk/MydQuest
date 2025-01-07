@@ -15,4 +15,11 @@ projects:
       - src: poggit/libasynql/libasynql
         branch: master
         version: ^4.2.3
+      - src: DaPigGuy/libPiggyEconomy/libPiggyEconomy
+        branch: master
+        version: ^3.0.3
+      - src: DaPigGuy/libPiggyUpdateChecker/libPiggyUpdateChecker
+        branch: master
+        version: ^1.0.0
+...
 ...

@@ -2,7 +2,7 @@
 
 namespace angga7togk\mydquest\i18n;
 
-use angga7togk\mydskill\utils\StringArrayMultiton;
+use angga7togk\mydquest\utils\StringArrayMultiton;
 use pocketmine\lang\Language;
 use pocketmine\utils\TextFormat;
 use SplFileInfo;

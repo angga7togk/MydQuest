@@ -61,30 +61,12 @@ SET IsActive = :value
 WHERE Player = :player AND QuestId = :questid;
 -- #  }
 
--- #  { set_completed_count
--- #    :player string
--- #    :questid string
--- #    :value int
-UPDATE MydQuest
-SET CompletedCount = :value
-WHERE Player = :player AND QuestId = :questid;
--- #  }
-
 -- #  { add_completed_count
 -- #    :player string
 -- #    :questid string
 -- #    :value int
 UPDATE MydQuest
 SET CompletedCount = CompletedCount + :value
-WHERE Player = :player AND QuestId = :questid;
--- #  }
-
--- #  { set_failed_count
--- #    :player string
--- #    :questid string
--- #    :value int
-UPDATE MydQuest
-SET FailedCount = :value
 WHERE Player = :player AND QuestId = :questid;
 -- #  }
 
@@ -97,15 +79,6 @@ SET FailedCount = FailedCount + :value
 WHERE Player = :player AND QuestId = :questid;
 -- #  }
 
--- #  { set_progress
--- #    :player string
--- #    :questid string
--- #    :value int
-UPDATE MydQuest
-SET QuestProgress = :value
-WHERE Player = :player AND QuestId = :questid;
--- #  }
-
 -- #  { add_progress
 -- #    :player string
 -- #    :questid string
@@ -115,22 +88,15 @@ SET QuestProgress = QuestProgress + :value
 WHERE Player = :player AND QuestId = :questid;
 -- #  }
 
--- #  { set_last_time
--- #    :player string
--- #    :questid string
--- #    :value string
-UPDATE MydQuest
-SET LastTime = LastTime + :value
-WHERE Player = :player AND QuestId = :questid;
--- #  }
-
 -- #  { reset_player_progress
 -- #    :player string
+-- #    :lasttime string
 UPDATE MydQuest
 SET IsComplete = false,
     IsActive = false,
-    QuestProgress = 0
-WHERE Player = :playere;
+    QuestProgress = 0,
+    LastTime = :lasttime
+WHERE Player = :player;
 -- #  }
 
 -- #}

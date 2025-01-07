@@ -6,3 +6,6 @@ database:
     password: ""
     port: 3306
     database: ""
+
+economy:
+  provider: bedrockeconomy
