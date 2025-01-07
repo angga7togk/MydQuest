@@ -1,0 +1,83 @@
+{
+  "id": "A2s213", // max 6 characters, only letters and numbers
+  "name": "Example Quest", // max 32 characters
+  "description": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
+  "button": "minecraft:diamond_sword",
+  "difficulty": "NORMAL", // EASY, NORMAL, HARD, IMPOSSIBLE
+  "goal_progress": 1000, // if progress player >= goal_progress, the quest is completed
+
+  "rewards": [
+    {
+      "type": "COMMAND",
+      "value": "give {player} apple 5"
+    },
+    {
+      "type": "COMMAND",
+      "value": "give {player} gold_ingot 10",
+      "chance": 51 // chance 1 - 100, If the chance is removed, it will become 100%, meaning a prize will always be given if the player successfully completes the quest
+    },
+    {
+      "type": "ITEM",
+      "value": {
+        "item": "minecraft:diamond",
+        "amount": 3
+      }
+    },
+    {
+      "type": "ITEM",
+      "chance": 10, // The smaller the chance, the harder it is to get the reward
+      "value": {
+        "item": "diamond_sword",
+        "amount": 1,
+        "custom_name": "&bSuper Sword", // opsional
+        "lore": ["&7Sword Legendary"], // opsional
+        "enchantments": ["sharpness:5", "fire_aspect:2", "vampire:1"]
+      }
+    }
+  ],
+
+  /**
+   * All conditions are optional, can be filled in or not
+   */
+  "actions": [
+    {
+      "type": "BREAK",
+      "condition": {
+        "target_block": "minecraft:stone",
+        "item_in_hand": "minecraft:stone_pickaxe"
+      },
+      "add_progress": 1 // add progress if break block
+    },
+    {
+      "type": "PLACE",
+      "condition": {
+        "item_in_hand": "minecraft:stone_pickaxe"
+      },
+      "add_progress": 1 // add progress if break block
+    },
+    {
+      "type": "CONSUME",
+      "condition": {
+        "consume_item": "minecraft:stone_pickaxe"
+      },
+      "add_progress": 1 // add progress if break block
+    },
+    {
+      "type": "KILL",
+      "condition": {
+        "target_entity": "PLAYER", // PLAYER, ENTITY
+        "item_in_hand": "minecraft:stone_sword"
+      },
+      "add_progress": 5
+    },
+    {
+      "type": "ENCHANT",
+      "condition": {
+        "enchantment": "sharpness",
+        "enchant_level": ">10", // >, <, >=, <=, ==, !=, or remove "enchant_level"
+        "item_in_hand": "minecraft:stone_sword"
+      },
+      "add_progress": 2
+    }
+  ]
+}
