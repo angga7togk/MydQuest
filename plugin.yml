@@ -1,6 +1,6 @@
 name: MydQuest
 main: angga7togk\mydquest\MydQuest
-api: 5.0.0
-version: 1.0.0
+api: 5.3.0
+version: 0.0.1
 author: Angga7Togk
-description: The Ultimate Daily Quest plugin for PocketMine-MP
+description: The Ultimate Daily Quest plugin for PocketMine-MP (BETA)

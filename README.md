@@ -8,7 +8,7 @@
   </a>
 </p>
 
-<h1 align="center">RPG MydQuest</h1>
+<h1 align="center">RPG MydQuest (BETA)</h1>
 <p align="center"><strong>The Ultimate RPG Daily Quest Plugin for PocketMine-MP – Enhance Gameplay, Boost Player Engagement, and Create Immersive Adventures.</strong></p>
 
 ---
@@ -74,7 +74,7 @@ Create diverse and exciting rewards for your quests using these fully customizab
 
 Enhance compatibility and functionality by integrating with these supported plugins:
 
-- 🪄 **PiggyCustomEnchant**: Add custom enchantments to item rewards.
+- 🪄 **PiggyCustomEnchantments**: Add custom enchantments to item rewards.
 - 💰 **EconomyAPI**: Provide money rewards for completed quests.
 - 🏦 **BedrockEconomy**: Support for offering money rewards.
 - 🏘️ **EconomyLand**: Prevent exploitation and validate land ownership.
