@@ -4,6 +4,8 @@ namespace angga7togk\mydquest\quest\datastorage;
 
 
 use angga7togk\mydquest\quest\datastorage\model\QuestPlayer;
+use angga7togk\mydquest\quest\TypeQuest;
+use DateTime;
 use pocketmine\player\Player;
 use poggit\libasynql\DataConnector;
 use poggit\libasynql\libasynql;
@@ -12,6 +14,7 @@ class SQLDataStorer extends BaseDataStorer
 {
 
   const INITIALIZE_TABLES = "mydquest.init";
+  const INSERT_PLAYER = "mydquest.insert_player";
 
   const GET_PLAYER_ALL = "mydquest.getplayer_all";
   const GET_PLAYER_ONE = "mydquest.getplayer_one";
@@ -21,6 +24,7 @@ class SQLDataStorer extends BaseDataStorer
   const SET_COMPLETED_COUNT = "mydquest.set_completed_count";
   const SET_FAILED_COUNT = "mydquest.set_failed_count";
   const SET_PROGRESS = "mydquest.set_progress";
+  const SET_LAST_TIME = "mydquest.set_last_time";
 
   const ADD_COMPLETED_COUNT = "mydquest.add_completed_count";
   const ADD_FAILED_COUNT = "mydquest.add_failed_count";
@@ -31,14 +35,19 @@ class SQLDataStorer extends BaseDataStorer
   protected DataConnector $database;
   protected string $type;
 
-  public function getPlayerAll(Player $player): array
+
+  /**
+   * @param callable(PlayerQuest[] $quests, array $rows): void $callable
+   */
+
+  public function getPlayerAll(Player $player, callable $callable): void
   {
     $playerName = strtolower($player->getName());
     $questPlayers = [];
 
     $this->database->executeSelect(self::GET_PLAYER_ALL, [
       'player' => $playerName,
-    ], function (array $rows) use (&$questPlayers, $playerName) {
+    ], function (array $rows) use (&$questPlayers, $playerName, $callable) {
       foreach ($rows as $row) {
         $questPlayers[] = new QuestPlayer(
           $playerName,
@@ -47,42 +56,58 @@ class SQLDataStorer extends BaseDataStorer
           (bool)$row['IsComplete'],
           (bool)$row['IsActive'],
           (int)$row['CompletedCount'],
-          (int)$row['FailedCount']
+          (int)$row['FailedCount'],
+          $row['LastTime']
         );
       }
+      $callable($questPlayers, $rows);
     });
-
-    // Menunggu hasil async selesai (opsional, tergantung pada implementasi lingkungan)
-    $this->database->waitAll();
-
-    return $questPlayers;
+    $callable($questPlayers, []);
   }
 
-  public function getPlayerOne(Player $player, string $questId): ?QuestPlayer
+  public function getPlayerOne(Player $player, string $questId, callable $callable): void
   {
     $playerName = strtolower($player->getName());
-
     $result = null;
 
     $this->database->executeSelect(self::GET_PLAYER_ONE, [
       'player' => $playerName,
       'questid' => $questId,
-    ], function (array $rows) use (&$result) {
+    ], function (array $rows) use (&$result, $callable) {
       if (!empty($rows)) {
         $row = $rows[0];
         $result = new QuestPlayer(
           $row['Player'],
           $row['QuestId'],
-          $row['QuestProgress'],
+          (int)$row['QuestProgress'],
           (bool) $row['IsComplete'],
           (bool) $row['IsActive'],
-          $row['CompletedCount'],
-          $row['FailedCount']
+          (int)$row['CompletedCount'],
+          (int)$row['FailedCount'],
+          $row['LastTime']
         );
       }
+      $callable($result, $rows);
     });
+    $callable($result, []);
+  }
 
-    return $result;
+  public function insertPlayer(Player $player, string $questId, DateTime $lastTime): void
+  {
+    $this->database->executeChange(self::INSERT_PLAYER, [
+      'player' => strtolower($player->getName()),
+      'questid' => $questId,
+      'lasttime' => $lastTime->getTimestamp(),
+    ]);
+  }
+
+  public function setLastTime(Player $player, string $questId, DateTime $lastTime): void
+  {
+    $this->database->executeChange(self::SET_LAST_TIME, [
+      'player' => strtolower($player->getName()),
+      'questid' => $questId,
+      'lasttime' => $lastTime->getTimestamp(),
+    ]);
   }
 
 
@@ -158,10 +183,10 @@ class SQLDataStorer extends BaseDataStorer
     ]);
   }
 
-  public function reset(Player $player): void
+  public function resetPlayerProgress(Player $player): void
   {
     $this->database->executeChange(self::RESET_PLAYER_PROGRESS, [
-      'player' => strtolower($player->getName())
+      'player' => strtolower($player->getName()),
     ]);
   }
 

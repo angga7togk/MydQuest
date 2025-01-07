@@ -11,8 +11,24 @@ CREATE TABLE
     IsActive BOOLEAN NOT NULL DEFAULT false,
     CompletedCount INT NOT NULL DEFAULT 0,
     FailedCount INT NOT NULL DEFAULT 0,
-    LastLogin TIMESTAMP NOT NULL,
+    LastTime TIMESTAMP NOT NULL,
     PRIMARY KEY (Player, QuestId)
+  );
+-- #  }
+
+-- #  { insert_player
+-- #    :player string
+-- #    :questid string
+-- #    :lasttime timestamp
+INSERT INTO MydQuest (
+    Player,
+    QuestId,
+    LastTime
+  )
+VALUES (
+    :player,
+    :questid,
+    :lasttime
   );
 -- #  }
 
@@ -63,7 +79,6 @@ SET CompletedCount = CompletedCount + :value
 WHERE Player = :player AND QuestId = :questid;
 -- #  }
 
-
 -- #  { set_failed_count
 -- #    :player string
 -- #    :questid string
@@ -81,7 +96,6 @@ UPDATE MydQuest
 SET FailedCount = FailedCount + :value
 WHERE Player = :player AND QuestId = :questid;
 -- #  }
-
 
 -- #  { set_progress
 -- #    :player string
@@ -101,14 +115,22 @@ SET QuestProgress = QuestProgress + :value
 WHERE Player = :player AND QuestId = :questid;
 -- #  }
 
+-- #  { set_last_time
+-- #    :player string
+-- #    :questid string
+-- #    :value string
+UPDATE MydQuest
+SET LastTime = LastTime + :value
+WHERE Player = :player AND QuestId = :questid;
+-- #  }
 
--- #  { reset_player_progess
+-- #  { reset_player_progress
 -- #    :player string
 UPDATE MydQuest
 SET IsComplete = false,
     IsActive = false,
     QuestProgress = 0
-WHERE Player = :player AND QuestId = :questid;
+WHERE Player = :playere;
 -- #  }
 
 -- #}

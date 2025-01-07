@@ -2,6 +2,9 @@
 
 namespace angga7togk\mydquest\quest\datastorage\model;
 
+use angga7togk\mydquest\quest\TypeQuest;
+use DateTime;
+
 final class QuestPlayer
 {
 
@@ -12,7 +15,8 @@ final class QuestPlayer
     private readonly bool $isComplete,
     private readonly bool $isActive,
     private readonly int $completedCount,
-    private readonly int $failedCount
+    private readonly int $failedCount,
+    private readonly string $lastTime,
   ) {}
 
   public function getPlayerName(): string
@@ -24,7 +28,7 @@ final class QuestPlayer
   {
     return $this->questId;
   }
-
+  
   public function getProgress(): int
   {
     return $this->progress;
@@ -48,5 +52,9 @@ final class QuestPlayer
   public function getFailedCount(): int
   {
     return $this->failedCount;
+  }
+
+  public function getLastTime(): DateTime {
+    return new DateTime($this->lastTime);
   }
 }

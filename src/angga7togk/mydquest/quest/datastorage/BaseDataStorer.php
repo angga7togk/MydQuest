@@ -3,7 +3,8 @@
 namespace angga7togk\mydquest\quest\datastorage;
 
 use angga7togk\mydquest\MydQuest;
-use angga7togk\mydquest\quest\datastorage\model\QuestPlayer;
+use angga7togk\mydquest\quest\TypeQuest;
+use DateTime;
 use pocketmine\player\Player;
 
 abstract class BaseDataStorer
@@ -19,12 +20,22 @@ abstract class BaseDataStorer
     return $this->plugin;
   }
 
-  /**
-   * @return QuestPlayer[]
-   */
-  protected abstract function getPlayerAll(Player $player): array;
 
-  protected abstract function getPlayerOne(Player $player, string $questId): ?QuestPlayer;
+  /**
+   * @param callable(PlayerQuest[] $quests, array $rows): void $callable
+   */
+
+  protected abstract function getPlayerAll(Player $player, callable $callable): void;
+
+
+  /**
+   * @param callable(PlayerQuest $quest, array $rows): void $callable
+   */
+  protected abstract function getPlayerOne(Player $player, string $questId, callable $callable): void;
+
+  protected abstract function insertPlayer(Player $player, string $questId, DateTime $lastTime): void;
+
+  protected abstract function setLastTime(Player $player, string $questId, DateTime $lastTime): void;
 
   protected abstract function setIsComplete(Player $player, string $questId, bool $isComplete): void;
 
@@ -41,9 +52,10 @@ abstract class BaseDataStorer
 
 
   /**
-   * Reset data progress player if change day
+   * Reset data progress player
    */
-  protected abstract function reset(Player $player): void;
+  protected abstract function resetPlayerProgress(Player $player): void;
+
 
   /**
    * Called during class construction to let
