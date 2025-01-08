@@ -1,6 +1,6 @@
 <?php
 
-namespace angga7togk\mydquest\reward;
+namespace angga7togk\mydquest\quest\reward;
 
 use angga7togk\mydquest\quest\reward\RewardChance;
 use angga7togk\mydquest\quest\reward\RewardType;

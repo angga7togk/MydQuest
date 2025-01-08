@@ -1,9 +1,9 @@
 <?php
 
-namespace angga7togk\mydquest\quest\datastorage;
+namespace angga7togk\mydquest\database\storer;
 
 
-use angga7togk\mydquest\quest\datastorage\model\QuestPlayer;
+use angga7togk\mydquest\database\model\QuestPlayer;
 use angga7togk\mydquest\utils\Utils;
 use DateTime;
 use pocketmine\player\Player;
@@ -33,17 +33,17 @@ class SQLDataStorer extends BaseDataStorer
 
 
   /**
-   * @param callable(PlayerQuest[] $quests, array $rows): void $callable
+   * @return QuestPlayer[]
    */
 
-  public function getPlayerAll(Player $player, callable $callable): void
+  public function getPlayerAll(Player $player): array
   {
     $playerName = strtolower($player->getName());
     $questPlayers = [];
 
     $this->database->executeSelect(self::GET_PLAYER_ALL, [
       'player' => $playerName,
-    ], function (array $rows) use (&$questPlayers, $playerName, $callable) {
+    ], function (array $rows) use (&$questPlayers, $playerName) {
       foreach ($rows as $row) {
         $questPlayers[] = new QuestPlayer(
           $playerName,
@@ -56,23 +56,18 @@ class SQLDataStorer extends BaseDataStorer
           $row['LastTime']
         );
       }
-      $callable($questPlayers, $rows);
     });
-    $callable($questPlayers, []);
+    return $questPlayers;
   }
 
-  /**
-   * @param callable(PlayerQuest $quest, array $rows): void $callable
-   */
-  public function getPlayerOne(Player $player, string $questId, callable $callable): void
+  public function getPlayerOne(Player $player, string $questId): ?QuestPlayer 
   {
     $playerName = strtolower($player->getName());
     $result = null;
-
     $this->database->executeSelect(self::GET_PLAYER_ONE, [
       'player' => $playerName,
       'questid' => $questId,
-    ], function (array $rows) use (&$result, $callable) {
+    ], function (array $rows) use (&$result) {
       if (!empty($rows)) {
         $row = $rows[0];
         $result = new QuestPlayer(
@@ -86,9 +81,8 @@ class SQLDataStorer extends BaseDataStorer
           $row['LastTime']
         );
       }
-      $callable($result, $rows);
     });
-    $callable($result, []);
+    return $result;
   }
 
   public function insertPlayer(Player $player, string $questId, DateTime $lastTime): void

@@ -4,8 +4,11 @@ namespace angga7togk\mydquest\utils;
 
 use DateTime;
 use DateTimeZone;
+use pocketmine\entity\Entity;
 use pocketmine\item\Item;
 use pocketmine\item\StringToItemParser;
+use pocketmine\network\mcpe\protocol\PlaySoundPacket;
+use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
 
 final class Utils
@@ -44,7 +47,7 @@ final class Utils
         if (!empty($line)) {
           $lore[] = TextFormat::colorize($prefix) . $line . TextFormat::colorize($suffix);
         }
-        $lore[] = ''; 
+        $lore[] = '';
         $line = '';
       } elseif (strlen($line . ' ' . $word) > 30) {
         $lore[] = TextFormat::colorize($prefix) . $line . TextFormat::colorize($suffix);

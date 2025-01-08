@@ -9,6 +9,7 @@ use pocketmine\event\Listener;
 class JsonQuest extends Quest implements Listener
 {
 
+  /** @priority MONITOR */
   public function onBreak(BlockBreakEvent $event)
   {
     $actions = $this->getActions();
@@ -17,16 +18,12 @@ class JsonQuest extends Quest implements Listener
       return;
     }
 
-
     $db = $this->getLoader()->getDatabase();
     $db->getPlayerOne(
       $player,
       $this->getId(),
       function ($pq, $rows) use (&$player, $event, $db, $actions) {
-
-        $player->sendMessage("masuk ke database callable");
-        $player->sendMessage("masuk ke database foreach");
-        if (!$pq->isActive()) return;
+        if ($pq?->isActive() !== true) return;
 
         $player->sendMessage("masuk ke database Quest active");
 

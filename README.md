@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/angga7togk/MydQuest">
-    <img src="https://github.com/angga7togk/MydQuest/blob/master/icon.png?raw=true" width="25%">
+    <img src="https://raw.githubusercontent.com/angga7togk/MydQuest/refs/heads/master/quest.png" width="25%">
   </a>
 </p>
 

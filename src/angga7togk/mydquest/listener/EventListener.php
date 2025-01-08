@@ -4,6 +4,7 @@ namespace angga7togk\mydquest\listener;
 
 use angga7togk\mydquest\MydQuest;
 use angga7togk\mydquest\utils\Utils;
+use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerJoinEvent;
 

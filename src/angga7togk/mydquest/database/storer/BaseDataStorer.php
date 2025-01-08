@@ -1,8 +1,9 @@
 <?php
 
-namespace angga7togk\mydquest\quest\datastorage;
+namespace angga7togk\mydquest\database\storer;
 
 use angga7togk\mydquest\MydQuest;
+use angga7togk\mydquest\database\model\QuestPlayer;
 use DateTime;
 use pocketmine\player\Player;
 
@@ -19,18 +20,13 @@ abstract class BaseDataStorer
     return $this->plugin;
   }
 
-
   /**
-   * @param callable(PlayerQuest[] $quests, array $rows): void $callable
+   * @return QuestPlayer[]
    */
 
-  protected abstract function getPlayerAll(Player $player, callable $callable): void;
+  protected abstract function getPlayerAll(Player $player): array;
 
-
-  /**
-   * @param callable(PlayerQuest $quest, array $rows): void $callable
-   */
-  protected abstract function getPlayerOne(Player $player, string $questId, callable $callable): void;
+  protected abstract function getPlayerOne(Player $player, string $questId): ?QuestPlayer;
 
   protected abstract function insertPlayer(Player $player, string $questId, DateTime $lastTime): void;
 
@@ -41,7 +37,7 @@ abstract class BaseDataStorer
   protected abstract function addCompletedCount(Player $player, string $questId, int $count): void;
 
   protected abstract function addFailedCount(Player $player, string $questId, int $count): void;
-  
+
   protected abstract function addProgress(Player $player, string $questId, int $progress): void;
 
 

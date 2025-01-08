@@ -1,9 +1,9 @@
 <?php
 
-namespace angga7togk\mydquest\reward\types;
+namespace angga7togk\mydquest\quest\reward\types;
 
 use angga7togk\mydquest\MydQuest;
-use angga7togk\mydquest\reward\Reward;
+use angga7togk\mydquest\quest\reward\Reward;
 use DaPigGuy\PiggyCustomEnchants\CustomEnchantManager;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\enchantment\EnchantmentInstance;

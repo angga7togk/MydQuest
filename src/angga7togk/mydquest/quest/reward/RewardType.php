@@ -2,11 +2,11 @@
 
 namespace angga7togk\mydquest\quest\reward;
 
-enum RewardType
+enum RewardType: string
 {
-  case COMMAND;
-  case ITEM;
-  case XP;
-  case XP_LEVEL;
-  case MONEY;
+  case COMMAND = "COMMAND";
+  case ITEM = "ITEM";
+  case XP = "XP";
+  case XP_LEVEL = "XP_LEVEL";
+  case MONEY = "MONEY";
 }

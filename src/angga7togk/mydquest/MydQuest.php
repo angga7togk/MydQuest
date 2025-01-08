@@ -2,14 +2,23 @@
 
 namespace angga7togk\mydquest;
 
+use angga7togk\mydquest\database\DataManager;
 use angga7togk\mydquest\i18n\MydLang;
 use angga7togk\mydquest\listener\EventListener;
 use angga7togk\mydquest\quest\Quest;
-use angga7togk\mydquest\quest\datastorage\MySQLDataStorer;
-use angga7togk\mydquest\quest\datastorage\SQLDataStorer;
-use angga7togk\mydquest\quest\datastorage\SQLiteDataStorer;
+use angga7togk\mydquest\database\storer\MySQLDataStorer;
+use angga7togk\mydquest\database\storer\SQLDataStorer;
+use angga7togk\mydquest\database\storer\SQLiteDataStorer;
 use angga7togk\mydquest\quest\Difficulty;
 use angga7togk\mydquest\quest\JsonQuest;
+use angga7togk\mydquest\quest\reward\RewardType;
+use angga7togk\mydquest\quest\reward\Reward;
+use angga7togk\mydquest\quest\reward\RewardChance;
+use angga7togk\mydquest\quest\reward\types\CommandReward;
+use angga7togk\mydquest\quest\reward\types\ItemReward;
+use angga7togk\mydquest\quest\reward\types\MoneyReward;
+use angga7togk\mydquest\quest\reward\types\XpLevelReward;
+use angga7togk\mydquest\quest\reward\types\XpReward;
 use angga7togk\mydquest\utils\Utils;
 use DaPigGuy\libPiggyEconomy\libPiggyEconomy;
 use DaPigGuy\libPiggyEconomy\providers\EconomyProvider;
@@ -25,6 +34,7 @@ class MydQuest extends PluginBase
   use SingletonTrait;
 
   private SQLDataStorer $database;
+  private DataManager $dataManager;
   private ?EconomyProvider $economyProvider = null;
 
 
@@ -41,18 +51,21 @@ class MydQuest extends PluginBase
   public function onEnable(): void
   {
     libPiggyUpdateChecker::init($this);
+
     $this->saveDefaultConfig();
+
     $this->selectDatabase();
+
+    $this->dataManager = new DataManager($this, $this->database);
+
     $this->selectLanguage();
+
+    $this->checkSoftDependencies();
 
     /** Register Default Quests */
     $this->registerJsonQuests();
 
-
     $this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
-
-
-    $this->checkSoftDependencies();
   }
 
   public function onDisable(): void
@@ -63,7 +76,7 @@ class MydQuest extends PluginBase
   private function checkSoftDependencies(): void
   {
     $plMgr = $this->getServer()->getPluginManager();
-    
+
     self::$piggyCustomEnchantmentsSupported = $plMgr->getPlugin("PiggyCustomEnchants") !== null;
 
     if (
@@ -97,7 +110,7 @@ class MydQuest extends PluginBase
     MydLang::setConsoleLocale($this->getConfig()->get('language', 'en_us'));
   }
 
-  private function selectDatabase(): bool
+  private function selectDatabase(): void
   {
     switch (strtolower($this->getConfig()->getNested("database.type", "sqlite3"))) {
       default:
@@ -109,7 +122,6 @@ class MydQuest extends PluginBase
         $this->database = new SQLiteDataStorer($this);
         break;
     }
-    return true;
   }
 
   public function getDatabase(): SQLDataStorer
@@ -117,7 +129,12 @@ class MydQuest extends PluginBase
     return $this->database;
   }
 
-  public function getEconomyProvider(): EconomyProvider
+  public function getDataManager(): DataManager
+  {
+    return $this->dataManager;
+  }
+
+  public function getEconomyProvider(): ?EconomyProvider
   {
     return $this->economyProvider;
   }
@@ -167,6 +184,29 @@ class MydQuest extends PluginBase
   {
     $this->validationQuestArray($q);
 
+    /** @var Reward[] $rewards */
+    $rewards = [];
+    foreach ($q['rewards'] as $reward) {
+      $type = RewardType::from(strtoupper($reward['type']));
+      $chance = new RewardChance(isset($reward['chance']) ? (int) $reward['chance'] : 100);
+      switch ($type) {
+        case RewardType::COMMAND:
+          $rewards[] = new CommandReward($type, $reward['value'], $chance);
+          break;
+        case RewardType::ITEM:
+          $rewards[] = new ItemReward($type, $reward['value'], $chance);
+          break;
+        case RewardType::MONEY:
+          $rewards[] = new MoneyReward($type, $reward['value'], $chance);
+          break;
+        case RewardType::XP:
+          $rewards[] = new XpReward($type, $reward['value'], $chance);
+          break;
+        case RewardType::XP_LEVEL:
+          $rewards[] = new XpLevelReward($type, $reward['value'], $chance);
+          break;
+      }
+    }
 
     $quest = new JsonQuest(
       $q['id'],
@@ -175,7 +215,7 @@ class MydQuest extends PluginBase
       Difficulty::tryFrom($q['difficulty']),
       StringToItemParser::getInstance()->parse($q['button']),
       (int)$q['goal_progress'],
-      [],
+      $rewards,
       $q['actions']
     );
     $this->getServer()->getLogger()->debug("Registered quest: {$quest->getId()}");
@@ -188,18 +228,28 @@ class MydQuest extends PluginBase
    */
   private function validationQuestArray(array $q): void
   {
+    $questId = $q['id'] ?? 'unknown';
+    $questName = $q['name'] ?? 'unknown';
+
     if (!isset($q['id'])) throw new \Exception("Key 'id' is missing in the json quest array.");
     if (!isset($q['name'])) throw new \Exception("Key 'name' is missing in the json quest array.");
-    if (!isset($q['description'])) throw new \Exception("Key 'description' is missing in the json quest array.");
-    if (!isset($q['button'])) throw new \Exception("Key 'button' is missing in the json quest array.");
-    if (!isset($q['difficulty'])) throw new \Exception("Key 'difficulty' is missing in the json quest array.");
-    if (!isset($q['goal_progress'])) throw new \Exception("Key 'goal_progress' is missing in the json quest array.");
-    if (!isset($q['rewards'])) throw new \Exception("Key 'rewards' is missing in the json quest array.");
+    if (!isset($q['description'])) throw new \Exception("Key 'description' is missing in the json quest array. Quest ID: {$questId}, Name: {$questName}");
+    if (!isset($q['button'])) throw new \Exception("Key 'button' is missing in the json quest array. Quest ID: {$questId}, Name: {$questName}");
+    if (!isset($q['difficulty'])) throw new \Exception("Key 'difficulty' is missing in the json quest array. Quest ID: {$questId}, Name: {$questName}");
+    if (!isset($q['goal_progress'])) throw new \Exception("Key 'goal_progress' is missing in the json quest array. Quest ID: {$questId}, Name: {$questName}");
+    if (!isset($q['rewards'])) throw new \Exception("Key 'rewards' is missing in the json quest array. Quest ID: {$questId}, Name: {$questName}");
+    if (!isset($q['actions'])) throw new \Exception("Key 'actions' is missing in the json quest array. Quest ID: {$questId}, Name: {$questName}");
 
-    if (strlen($q['id'])  > 6) throw new \Exception("Key 'id' must be less than 6 characters.");
-    if (strlen($q['name']) > 32) throw new \Exception("Key 'name' must be less than 32 characters.");
+    if (strlen($q['id']) > 6) {
+      throw new \Exception("Key 'id' must be less than 6 characters. Quest ID: {$questId}, Name: {$questName}");
+    }
+    if (strlen($q['name']) > 32) {
+      throw new \Exception("Key 'name' must be less than 32 characters. Quest ID: {$questId}, Name: {$questName}");
+    }
 
-    if (StringToItemParser::getInstance()->parse($q['button']) === null) throw new \Exception("Key 'button' must be a valid item.");
+    if (StringToItemParser::getInstance()->parse($q['button']) === null) {
+      throw new \Exception("Key 'button' must be a valid item. Quest ID: {$questId}, Name: {$questName}");
+    }
 
     if (
       $q['difficulty'] !== "EASY" &&
@@ -207,19 +257,28 @@ class MydQuest extends PluginBase
       $q['difficulty'] !== "HARD" &&
       $q['difficulty'] !== "IMPOSSIBLE"
     ) {
-      throw new \Exception("Key 'difficulty' must be 'EASY', 'NORMAL', 'HARD', or 'IMPOSSIBLE'.");
+      throw new \Exception("Key 'difficulty' must be 'EASY', 'NORMAL', 'HARD', or 'IMPOSSIBLE'. Quest ID: {$questId}, Name: {$questName}");
     }
 
     foreach ($q['rewards'] as $reward) {
-      if (!isset($reward['type'])) throw new \Exception("Key 'type' is missing in the 'rewards' json quest array.");
+      if (!isset($reward['type'])) {
+        throw new \Exception("Key 'type' is missing in the 'rewards' json quest array. Quest ID: {$questId}, Name: {$questName}");
+      }
       if (
         $reward['type'] !== 'COMMAND' &&
         $reward['type'] !== 'ITEM' &&
         $reward['type'] !== 'MONEY' &&
         $reward['type'] !== 'XP'
       ) {
+        throw new \Exception("Key 'type' must be 'COMMAND', 'ITEM', 'MONEY', or 'XP'. Quest ID: {$questId}, Name: {$questName}");
       }
-      if (!isset($reward['value'])) throw new \Exception("Key 'value' is missing in the 'rewards' json quest array.");
+      if ($reward['type'] === 'MONEY' && $this->getEconomyProvider() === null) {
+        throw new \Exception("Key 'type' = 'MONEY', please install the dependencies 'EconomyAPI' or 'BedrockEconomy'. Quest ID: {$questId}, Name: {$questName}");
+      }
+
+      if (!isset($reward['value'])) {
+        throw new \Exception("Key 'value' is missing in the 'rewards' json quest array. Quest ID: {$questId}, Name: {$questName}");
+      }
     }
   }
 }

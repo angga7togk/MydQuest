@@ -4,11 +4,15 @@ namespace angga7togk\mydquest\quest;
 
 use angga7togk\mydquest\i18n\MydLang;
 use angga7togk\mydquest\MydQuest;
-use angga7togk\mydquest\reward\Reward;
+use angga7togk\mydquest\quest\reward\Reward;
+use angga7togk\mydquest\quest\reward\RewardType;
 use angga7togk\mydquest\utils\Utils;
+use pocketmine\console\ConsoleCommandSender;
 use pocketmine\item\Item;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
+use pocketmine\world\sound\XpCollectSound;
+use pocketmine\world\sound\XpLevelUpSound;
 
 class Quest
 {
@@ -95,7 +99,47 @@ class Quest
     return $this->lang;
   }
 
-  protected function runProgress(Player $player): void {}
+  protected function runProgress(Player $player, int $addProgress): void
+  {
+    $mgr = $this->getLoader()->getDataManager();
+
+    $nextProgress = $mgr->addProgress($player, $this->getId(), $addProgress);
+    if ($nextProgress >= $this->getGoalProgress()) {
+
+      $this->giveRewards($player);
+
+
+      $player->getWorld()->addSound($player->getPosition(), new XpLevelUpSound(30), [$player]);
+
+      $mgr->setActive($player, $this->getId(), false);
+      $mgr->setComplete($player, $this->getId(), true);
+      $mgr->addCompletedCount($player, $this->getId(), 1);
+    }
+  }
+
+  private function giveRewards(Player $player)
+  {
+    $server = $this->getLoader()->getServer();
+    foreach ($this->getRewards() as $reward) {
+      switch ($reward->getType()) {
+        case RewardType::COMMAND:
+          $server->getCommandMap()->dispatch(new ConsoleCommandSender($server, $server->getLanguage()), str_replace("{player}", $player->getName(), $reward->getValue()));
+          break;
+        case RewardType::ITEM:
+          $player->getInventory()->addItem($reward->getValue());
+          break;
+        case RewardType::MONEY:
+          $this->getLoader()->getEconomyProvider()?->giveMoney($player, $reward->getValue());
+          break;
+        case RewardType::XP:
+          $player->getXpManager()->addXp($reward->getValue());
+          break;
+        case RewardType::XP_LEVEL:
+          $player->getXpManager()->addXpLevels($reward->getValue());
+          break;
+      }
+    }
+  }
 
   /**
    * Validasi biar ga kelewat batas :V

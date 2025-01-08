@@ -1,6 +1,6 @@
 <?php
 
-namespace angga7togk\mydquest\quest\datastorage\model;
+namespace angga7togk\mydquest\database\model;
 
 use DateTime;
 
