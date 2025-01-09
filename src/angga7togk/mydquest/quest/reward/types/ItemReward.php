@@ -10,6 +10,7 @@ use pocketmine\item\enchantment\EnchantmentInstance;
 use pocketmine\item\enchantment\VanillaEnchantments;
 use pocketmine\item\Item;
 use pocketmine\item\StringToItemParser;
+use pocketmine\utils\TextFormat;
 
 class ItemReward extends Reward
 {
@@ -25,9 +26,9 @@ class ItemReward extends Reward
   {
     $item = StringToItemParser::getInstance()->parse($d['item']);
     $item->setCount(isset($d['count']) ? $d['count'] : 1);
-    if(isset($d['custom_name'])) $item->setCustomName($d['custom_name']);
-    if(isset($d['lore']) && is_array($d['lore'])) $item->setLore($d['lore']);
-    if(isset($d['enchantments'])) {
+    if (isset($d['custom_name'])) $item->setCustomName(TextFormat::colorize($d['custom_name']));
+    if (isset($d['lore']) && is_array($d['lore'])) $item->setLore(array_map(fn($s) => TextFormat::colorize($s), $d['lore']));
+    if (isset($d['enchantments'])) {
       foreach ($d['enchantments'] as $enchantment) {
         $ee = explode(':', $enchantment);
         $enchant = $this->getEnchantmentByName($ee[0]);

@@ -1,0 +1,9 @@
+{
+  "marscode.codeCompletionPro": {
+    "enableCodeCompletionPro": false
+  },
+  "marscode.enableInlineCommand": true,
+  "yaml.schemas": {
+    "https://json.schemastore.org/pocketmine-plugin.json": "file:///home/angga7togk/minecraft-server/MydCraft/plugins/MydQuest/plugin.yml"
+  }
+}
