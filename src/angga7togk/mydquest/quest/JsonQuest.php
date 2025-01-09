@@ -47,43 +47,41 @@ class JsonQuest extends Quest implements Listener
   }
 
 
-  // /** @priority MONITOR */
-  // public function onPlace(BlockPlaceEvent $event)
-  // {
-  //   $actions = $this->getActions();
-  //   $player = $event->getPlayer();
-  //   if (!isset($actions['place'])) return;
+  /** @priority MONITOR */
+  public function onPlace(BlockPlaceEvent $event)
+  {
+    $actions = $this->getActions();
+    $player = $event->getPlayer();
+    if (!isset($actions['place'])) return;
 
-  //   $mgr = $this->getLoader()->getDataManager();
-  //   $questPlayer = $mgr->getQuestPlayer($player, $this->getId());
-  //   if ($questPlayer?->isActive() !== true) return;
+    $this->preRunProgress($player, function (ProgressQuest $progressQuest) use ($event, &$player, $actions) {
+      $condition = $actions['place']['condition'];
+      $itemHand = Utils::getSuffixItemName($event->getItem());
+      $blockTarget = Utils::getSuffixItemName($event->getBlockAgainst());
 
-  //   $condition = $actions['place']['condition'];
-  //   $itemHand = Utils::getSuffixItemName($event->getItem());
-  //   $blockTarget = Utils::getSuffixItemName($event->getBlockAgainst()->asItem());
+      $processedTargetBlock = $this->processTargetBlock($condition['target_block']);
+      $processedItemInHand = $this->processTargetBlock($condition['item_in_hand']);
 
-  //   $processedTargetBlock = $this->processTargetBlock($condition['target_block'] ?? []);
-  //   $processedItemInHand = $this->processTargetBlock($condition['item_in_hand'] ?? []);
+      $targetBlockValid = is_array($processedTargetBlock)
+        ? in_array($blockTarget, (array)$processedTargetBlock)
+        : ($blockTarget === $processedTargetBlock);
 
-  //   $targetBlockValid = is_array($processedTargetBlock)
-  //     ? in_array($blockTarget, $processedTargetBlock)
-  //     : ($blockTarget === $processedTargetBlock);
+      $itemHandValid = is_array($processedItemInHand)
+        ? in_array($itemHand, (array)$processedItemInHand)
+        : ($itemHand === $processedItemInHand);
 
-  //   $itemHandValid = is_array($processedItemInHand)
-  //     ? in_array($itemHand, $processedItemInHand)
-  //     : ($itemHand === $processedItemInHand);
-
-  //   // Cek kondisi AND atau OR
-  //   if (isset($condition['and'])) {
-  //     if ($targetBlockValid && $itemHandValid) {
-  //       $this->runProgress($player, (int)$actions['place']['add_progress']);
-  //     }
-  //   } else {
-  //     if ($targetBlockValid || $itemHandValid) {
-  //       $this->runProgress($player, (int)$actions['place']['add_progress']);
-  //     }
-  //   }
-  // }
+      // Cek kondisi AND atau OR
+      if ($condition['operator'] === "and") {
+        if ($targetBlockValid && $itemHandValid) {
+          $progressQuest->runProgress($player, (int)$actions['place']['add_progress']);
+        }
+      } else {
+        if ($targetBlockValid || $itemHandValid) {
+          $progressQuest->runProgress($player, (int)$actions['place']['add_progress']);
+        }
+      }
+    });
+  }
 
 
   public function processTargetBlock(array|string $target): array|string
