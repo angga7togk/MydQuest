@@ -11,7 +11,7 @@ CREATE TABLE
     IsActive BOOLEAN NOT NULL DEFAULT false,
     CompletedCount INT NOT NULL DEFAULT 0,
     FailedCount INT NOT NULL DEFAULT 0,
-    LastTime TIMESTAMP NOT NULL,
+    LastTime TEXT NOT NULL,
     PRIMARY KEY (Player, QuestId)
   );
 -- #  }
@@ -19,7 +19,7 @@ CREATE TABLE
 -- #  { insert_player
 -- #    :player string
 -- #    :questid string
--- #    :lasttime timestamp
+-- #    :lasttime string
 INSERT INTO MydQuest (
     Player,
     QuestId,
@@ -46,7 +46,7 @@ SELECT * FROM MydQuest WHERE Player = :player AND QuestId = :questid;
 -- #  { set_is_complete
 -- #    :player string
 -- #    :questid string
--- #    :value boolean
+-- #    :value bool
 UPDATE MydQuest
 SET IsComplete = :value
 WHERE Player = :player AND QuestId = :questid;
@@ -55,7 +55,7 @@ WHERE Player = :player AND QuestId = :questid;
 -- #  { set_is_active
 -- #    :player string
 -- #    :questid string
--- #    :value boolean
+-- #    :value bool
 UPDATE MydQuest
 SET IsActive = :value
 WHERE Player = :player AND QuestId = :questid;

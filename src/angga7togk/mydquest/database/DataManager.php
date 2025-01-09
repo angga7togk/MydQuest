@@ -9,6 +9,7 @@ use angga7togk\mydquest\utils\Cache;
 use angga7togk\mydquest\utils\Utils;
 use pocketmine\player\Player;
 
+/** @deprecated */
 class DataManager
 {
   /** Cache constans */
@@ -30,12 +31,17 @@ class DataManager
     $playerName = strtolower($player->getName());
     $cacheKey = sprintf(self::CACHE_KEY_PLAYER, $playerName, $questId);
     if (Cache::has($cacheKey) && !$noCache) {
+      $player->sendMessage('Ada cache');
       return Cache::get($cacheKey);
     }
     $questPlayer = $this->database->getPlayerOne($player, $questId);
     if ($questPlayer !== null) {
+
+      $player->sendMessage('set cache');
       Cache::set($cacheKey, $questPlayer, self::CACHE_EXPIRE_TIME);
     }
+
+    $player->sendMessage('tidak ada cache');
     return $questPlayer;
   }
 

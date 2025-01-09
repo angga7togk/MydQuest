@@ -5,7 +5,6 @@ namespace angga7togk\mydquest\database\storer;
 
 use angga7togk\mydquest\database\model\QuestPlayer;
 use angga7togk\mydquest\utils\Utils;
-use DateTime;
 use pocketmine\player\Player;
 use poggit\libasynql\DataConnector;
 use poggit\libasynql\libasynql;
@@ -33,17 +32,15 @@ class SQLDataStorer extends BaseDataStorer
 
 
   /**
-   * @return QuestPlayer[]
+   * @param callable(QuestPlayer[] $questPlayers) $callable
    */
-
-  public function getPlayerAll(Player $player): array
+  public function getPlayerAll(Player $player, callable $callable): void
   {
     $playerName = strtolower($player->getName());
-    $questPlayers = [];
-
     $this->database->executeSelect(self::GET_PLAYER_ALL, [
       'player' => $playerName,
-    ], function (array $rows) use (&$questPlayers, $playerName) {
+    ], function (array $rows) use ($playerName, &$callable) {
+      $questPlayers = [];
       foreach ($rows as $row) {
         $questPlayers[] = new QuestPlayer(
           $playerName,
@@ -56,18 +53,21 @@ class SQLDataStorer extends BaseDataStorer
           $row['LastTime']
         );
       }
+      $callable($questPlayers);
     });
-    return $questPlayers;
   }
 
-  public function getPlayerOne(Player $player, string $questId): ?QuestPlayer 
+  /**
+   * @param callable(?QuestPlayer $questPlayer = null) $callable
+   */
+  public function getPlayerOne(Player $player, string $questId, callable $callable): void
   {
     $playerName = strtolower($player->getName());
-    $result = null;
     $this->database->executeSelect(self::GET_PLAYER_ONE, [
       'player' => $playerName,
       'questid' => $questId,
-    ], function (array $rows) use (&$result) {
+    ], function (array $rows) use (&$callable) {
+      $result = null;
       if (!empty($rows)) {
         $row = $rows[0];
         $result = new QuestPlayer(
@@ -80,17 +80,17 @@ class SQLDataStorer extends BaseDataStorer
           (int)$row['FailedCount'],
           $row['LastTime']
         );
+        $callable($result);
       }
     });
-    return $result;
   }
 
-  public function insertPlayer(Player $player, string $questId, DateTime $lastTime): void
+  public function insertPlayer(Player $player, string $questId): void
   {
-    $this->database->executeChange(self::INSERT_PLAYER, [
+    $this->database->executeInsert(self::INSERT_PLAYER, [
       'player' => strtolower($player->getName()),
       'questid' => $questId,
-      'lasttime' => $lastTime->getTimestamp(),
+      'lasttime' => Utils::getDate()->getTimestamp(),
     ]);
   }
 

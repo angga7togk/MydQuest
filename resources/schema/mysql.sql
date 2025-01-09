@@ -46,7 +46,7 @@ SELECT * FROM MydQuest WHERE Player = :player AND QuestId = :questid;
 -- #  { set_is_complete
 -- #    :player string
 -- #    :questid string
--- #    :value boolean
+-- #    :value bool
 UPDATE MydQuest
 SET IsComplete = :value
 WHERE Player = :player AND QuestId = :questid;
@@ -55,7 +55,7 @@ WHERE Player = :player AND QuestId = :questid;
 -- #  { set_is_active
 -- #    :player string
 -- #    :questid string
--- #    :value boolean
+-- #    :value bool
 UPDATE MydQuest
 SET IsActive = :value
 WHERE Player = :player AND QuestId = :questid;

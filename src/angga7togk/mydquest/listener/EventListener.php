@@ -17,6 +17,9 @@ class EventListener implements Listener
   public function onJoin(PlayerJoinEvent $event)
   {
     $player = $event->getPlayer();;
-    $this->plugin->getDataManager()->initDataPlayer($player);
+    $db = $this->plugin->getDatabase();
+    foreach (array_keys($this->plugin->getQuests()) as $id) {
+      $db->insertPlayer($player, $id);
+    }
   }
 }

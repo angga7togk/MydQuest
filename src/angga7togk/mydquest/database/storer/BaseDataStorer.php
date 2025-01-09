@@ -4,7 +4,6 @@ namespace angga7togk\mydquest\database\storer;
 
 use angga7togk\mydquest\MydQuest;
 use angga7togk\mydquest\database\model\QuestPlayer;
-use DateTime;
 use pocketmine\player\Player;
 
 abstract class BaseDataStorer
@@ -21,14 +20,16 @@ abstract class BaseDataStorer
   }
 
   /**
-   * @return QuestPlayer[]
+   * @param callable(QuestPlayer[] $questPlayers) $callable
    */
+  protected abstract function getPlayerAll(Player $player, callable $callable): void;
 
-  protected abstract function getPlayerAll(Player $player): array;
+  /**
+   * @param callable(?QuestPlayer $questPlayer = null) $callable
+   */
+  protected abstract function getPlayerOne(Player $player, string $questId, callable $callable): void;
 
-  protected abstract function getPlayerOne(Player $player, string $questId): ?QuestPlayer;
-
-  protected abstract function insertPlayer(Player $player, string $questId, DateTime $lastTime): void;
+  protected abstract function insertPlayer(Player $player, string $questId): void;
 
   protected abstract function setIsComplete(Player $player, string $questId, bool $isComplete): void;
 

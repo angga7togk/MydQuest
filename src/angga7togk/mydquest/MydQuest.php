@@ -2,7 +2,6 @@
 
 namespace angga7togk\mydquest;
 
-use angga7togk\mydquest\database\DataManager;
 use angga7togk\mydquest\i18n\MydLang;
 use angga7togk\mydquest\listener\EventListener;
 use angga7togk\mydquest\quest\Quest;
@@ -34,7 +33,6 @@ class MydQuest extends PluginBase
   use SingletonTrait;
 
   private SQLDataStorer $database;
-  private DataManager $dataManager;
   private ?EconomyProvider $economyProvider = null;
 
 
@@ -55,8 +53,6 @@ class MydQuest extends PluginBase
     $this->saveDefaultConfig();
 
     $this->selectDatabase();
-
-    $this->dataManager = new DataManager($this, $this->database);
 
     $this->selectLanguage();
 
@@ -127,11 +123,6 @@ class MydQuest extends PluginBase
   public function getDatabase(): SQLDataStorer
   {
     return $this->database;
-  }
-
-  public function getDataManager(): DataManager
-  {
-    return $this->dataManager;
   }
 
   public function getEconomyProvider(): ?EconomyProvider

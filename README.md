@@ -37,7 +37,7 @@ Take your quests to the next level with these flexible and fully customizable ac
 
 | **Type**            | **Description**                                                                     | **Status**     |
 | ------------------- | ----------------------------------------------------------------------------------- | -------------- |
-| 🛠️ **BREAK**        | Breaking specific blocks.                                                           | ⏳ In Progress |
+| 🛠️ **BREAK**        | Breaking specific blocks.                                                           | ✅ Done |
 | 🧱 **PLACE**        | Placing blocks.                                                                     | ⏳ In Progress |
 | ⚔️ **KILL**         | Kill an entity or player.                                                           | ⏳ In Progress |
 | 🍳 **COOK**         | Cooking items in a furnace or smoker.                                               | ⏳ In Progress |
