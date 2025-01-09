@@ -14,7 +14,7 @@ class Quest
 {
 
   private MydQuest $loader;
-  private MydLang $lang;
+  private MydLang $lang; 
 
   /**
    * @param string $questId max 6 characters
@@ -100,7 +100,7 @@ class Quest
   protected function preRunProgress(Player $player, callable $callable): void
   {
     $db = $this->getLoader()->getDatabase();
-    $db->getPlayerOne($player, $this->getId(), function ($questPlayer) use (&$player, &$callable) {
+    $db->getPlayerOne($player, $this->getId(), function ($questPlayer) use (&$callable) {
       if ($questPlayer?->isActive() !== true) return;
       if ($questPlayer?->isComplete() === true) return;
 

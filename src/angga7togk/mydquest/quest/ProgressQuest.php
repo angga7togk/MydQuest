@@ -20,7 +20,7 @@ class ProgressQuest
   public function getQuestPlayer(): QuestPlayer
   {
     return $this->questPlayer;
-  } 
+  }
 
   public function getQuest(): Quest
   {
@@ -48,7 +48,7 @@ class ProgressQuest
   private function giveRewards(Player $player)
   {
     $server = $this->getLoader()->getServer();
-    foreach ($this->getQuest()->getRewards() as $reward) {
+    foreach ($this->getQuest()->getRewards() as $reward)  {
       switch ($reward->getType()) {
         case RewardType::COMMAND:
           $server->getCommandMap()->dispatch(new ConsoleCommandSender($server, $server->getLanguage()), str_replace("{player}", $player->getName(), $reward->getValue()));
@@ -57,7 +57,9 @@ class ProgressQuest
           $player->getInventory()->addItem($reward->getValue());
           break;
         case RewardType::MONEY:
-          $this->getLoader()->getEconomyProvider()?->giveMoney($player, $reward->getValue());
+          if (($eco = $this->getLoader()->getEconomyProvider()) !== null) {
+            $eco->giveMoney($player, $reward->getValue());
+          }
           break;
         case RewardType::XP:
           $player->getXpManager()->addXp($reward->getValue());
