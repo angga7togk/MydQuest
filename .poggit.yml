@@ -21,8 +21,7 @@ projects:
       - src: DaPigGuy/libPiggyUpdateChecker/libPiggyUpdateChecker
         branch: master
         version: ^1.0.0
-      - src: xenialdan/apibossbar/apibossbar
-        vendor: inxomnyaa
+      - src: inxomnyaa/apibossbar/apibossbar
         branch: pm5
         version: ^0.1.6
 ---
