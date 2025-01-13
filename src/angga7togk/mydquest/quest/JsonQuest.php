@@ -22,8 +22,8 @@ class JsonQuest extends Quest implements Listener
       $itemHand = Utils::getSuffixItemName($player->getInventory()->getItemInHand());
       $blockTarget = Utils::getSuffixItemName($event->getBlock()->asItem());
 
-      $processedTargetBlock = $this->processTargetBlock($condition['target_block']);
-      $processedItemInHand = $this->processTargetBlock($condition['item_in_hand']);
+      $processedTargetBlock = $this->processTargetBlock($condition['target_block'] ?? []);
+      $processedItemInHand = $this->processTargetBlock($condition['item_in_hand'] ?? []);
 
       $targetBlockValid = is_array($processedTargetBlock)
         ? in_array($blockTarget, (array)$processedTargetBlock)
@@ -33,12 +33,11 @@ class JsonQuest extends Quest implements Listener
         ? in_array($itemHand, (array)$processedItemInHand)
         : ($itemHand === $processedItemInHand);
 
-      // Cek kondisi AND atau OR
-      if ($condition['operator'] === "and") {
+      if ($condition['operator'] == "and") {
         if ($targetBlockValid && $itemHandValid) {
           $progressQuest->runProgress($player, (int)$actions['break']['add_progress']);
         }
-      } else {
+      } elseif ($condition['operator'] == "or" || $condition['operator'] == "single") {
         if ($targetBlockValid || $itemHandValid) {
           $progressQuest->runProgress($player, (int)$actions['break']['add_progress']);
         }
@@ -59,8 +58,8 @@ class JsonQuest extends Quest implements Listener
       $itemHand = Utils::getSuffixItemName($event->getItem());
       $blockTarget = Utils::getSuffixItemName($event->getBlockAgainst());
 
-      $processedTargetBlock = $this->processTargetBlock($condition['target_block']);
-      $processedItemInHand = $this->processTargetBlock($condition['item_in_hand']);
+      $processedTargetBlock = $this->processTargetBlock($condition['target_block'] ?? []);
+      $processedItemInHand = $this->processTargetBlock($condition['item_in_hand'] ?? []);
 
       $targetBlockValid = is_array($processedTargetBlock)
         ? in_array($blockTarget, (array)$processedTargetBlock)
@@ -70,16 +69,15 @@ class JsonQuest extends Quest implements Listener
         ? in_array($itemHand, (array)$processedItemInHand)
         : ($itemHand === $processedItemInHand);
 
-      // Cek kondisi AND atau OR
-      if ($condition['operator'] === "and") {
-        if ($targetBlockValid && $itemHandValid) {
-          $progressQuest->runProgress($player, (int)$actions['place']['add_progress']);
+        if ($condition['operator'] == "and") {
+          if ($targetBlockValid && $itemHandValid) {
+            $progressQuest->runProgress($player, (int)$actions['place']['add_progress']);
+          }
+        } elseif ($condition['operator'] == "or" || $condition['operator'] == "single") {
+          if ($targetBlockValid || $itemHandValid) {
+            $progressQuest->runProgress($player, (int)$actions['place']['add_progress']);
+          }
         }
-      } else {
-        if ($targetBlockValid || $itemHandValid) {
-          $progressQuest->runProgress($player, (int)$actions['place']['add_progress']);
-        }
-      }
     });
   }
 
