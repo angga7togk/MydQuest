@@ -22,6 +22,7 @@ projects:
         branch: master
         version: ^1.0.0
       - src: xenialdan/apibossbar/apibossbar
+        vendor: inxomnyaa
         branch: pm5
         version: ^0.1.6
 ---
